@@ -105,6 +105,82 @@ This makes the system:
 
 ---
 
+## 🎨 UI/Layout Design
+
+The interface follows a ChatGPT-inspired layout with a clean, dual-panel design:
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                                                                         │
+│  ┌─────────────────────────────────┐  ┌───────────────────────────────┐ │
+│  │      SCHEMA VIEWER              │  │      CHAT INTERFACE          │ │
+│  │                                 │  │                               │ │
+│  │  ┌───────────────────────────┐ │  │  ┌─────────────────────────┐ │ │
+│  │  │ 🔍 Search tables...       │ │  │  │ User:                   │ │ │
+│  │  ├───────────────────────────┤ │  │  │ "Get all flight numbers │ │ │
+│  │  │ ▼ t_batch                 │ │  │  │  from the last 2 weeks" │ │ │
+│  │  │   ├─ flightNumber         │ │  │  └─────────────────────────┘ │ │
+│  │  │   ├─ flightDateTime       │ │  │  ┌─────────────────────────┐ │ │
+│  │  │   └─ flightStatus         │ │  │  │ AI:                     │ │ │
+│  │  │ ▼ t_customer              │ │  │  │ SELECT DISTINCT          │ │ │
+│  │  │   ├─ customerId           │ │  │  │   flightNumber          │ │ │
+│  │  │   ├─ customerName         │ │  │  │ FROM t_batch            │ │ │
+│  │  │   └─ customerEmail        │ │  │  │ WHERE flightDateTime    │ │ │
+│  │  │ ▶ t_booking               │ │  │  │   >= DATEADD(day, -14,  │ │ │
+│  │  │ ▶ t_aircraft              │ │  │  │       GETDATE());      │ │ │
+│  │  │ ...                       │ │  │  └─────────────────────────┘ │ │
+│  │  ├───────────────────────────┤ │  │                               │ │
+│  │  │ [▼ Expand All] [▲ Collapse]│ │  │  ┌─────────────────────────┐ │ │
+│  │  │     [Copy Selected]        │ │  │  │ User:                   │ │ │
+│  │  └───────────────────────────┘ │  │  │ [Type your query...]     │ │ │
+│  │                                 │  │  └─────────────────────────┘ │ │
+│  │ [Schema Stats: 5 tables]       │  │                               │ │
+│  └─────────────────────────────────┘  └───────────────────────────────┘ │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Panel Descriptions
+
+**Schema Viewer Panel (Left)**
+- Hierarchical tree view of database tables and columns
+- Search/filter functionality for quick navigation
+- Click to expand/collapse individual tables
+- Bulk controls: "Expand All" / "Collapse All"
+- Copy selected table/column names to clipboard
+- Schema statistics display (table count, etc.)
+
+**Chat Interface Panel (Right)**
+- ChatGPT-style conversation interface
+- User messages aligned left, AI responses aligned right
+- AI responses include:
+  - Generated SQL queries with syntax highlighting
+  - Brief explanations (when requested)
+- Input box at bottom for natural language queries
+- Conversation history with scrollable view
+- Copy SQL button on generated queries
+
+### Expand/Collapse Behavior
+
+- **Individual Tables**: Click triangle icon (▶/▼) to toggle
+- **Bulk Actions**: 
+  - "Expand All" - Opens all tables showing all columns
+  - "Collapse All" - Closes all tables to show only names
+- **Persistent State**: Panel state saved between sessions
+- **Responsive**: On smaller screens, panels stack vertically
+- **Split Control**: Drag handle between panels to resize (optional)
+
+### Layout Features
+
+- Clean, minimal design focused on usability
+- Dark/light mode support
+- Keyboard shortcuts (e.g., Cmd+K for search)
+- Mobile-responsive with collapsible schema panel
+- Syntax highlighting for SQL output
+- Copy-to-clipboard for easy query extraction
+
+---
+
 ## 📁 Project Structure (Proposed)
 
 ```
