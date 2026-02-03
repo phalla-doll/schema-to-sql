@@ -139,7 +139,7 @@ export default function Page() {
             </header>
 
             <div className="flex flex-1 overflow-hidden">
-                <aside className="w-80 border-r bg-muted/20">
+                <aside className="w-120 border-r bg-muted/20">
                     <ScrollArea className="h-full p-4">
                         <div className="mb-4">
                             <SchemaSearch onSearch={handleSearch} />

@@ -134,52 +134,54 @@ function TableItem({ table, isHighlighted, searchQuery }: TableItemProps) {
             </CardHeader>
 
             {isExpanded && (
-                <CardContent>
-                    <table className="w-full text-sm">
-                        <thead>
-                            <tr className="text-muted-foreground">
-                                <th className="px-2 py-1 text-left">Column</th>
-                                <th className="px-2 py-1 text-left">Type</th>
-                                <th className="px-2 py-1 text-center">PK</th>
-                                <th className="px-2 py-1 text-center">FK</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {table.columns.map((column, colIndex) => (
-                                <tr
-                                    key={`${column.name}-${colIndex}`}
-                                    className={`border-t ${
-                                        searchQuery &&
-                                        column.name
-                                            .toLowerCase()
-                                            .includes(searchQuery.toLowerCase())
-                                            ? 'bg-primary/10'
-                                            : ''
-                                    }`}
-                                >
-                                    <td className="px-2 py-1">{column.name}</td>
-                                    <td className="px-2 py-1 text-muted-foreground">
-                                        {column.type}
-                                    </td>
-                                    <td className="px-2 py-1 text-center">
-                                        {column.primaryKey ? (
-                                            <span className="text-primary">✓</span>
-                                        ) : null}
-                                    </td>
-                                    <td className="px-2 py-1 text-center">
-                                        {table.foreignKeys.find(
-                                            (fk) => fk.column === column.name
-                                        ) ? (
-                                            <span className="text-primary">✓</span>
-                                        ) : null}
-                                    </td>
+                <CardContent className="p-0 px-2">
+                    <div className="overflow-x-auto">
+                        <table className="w-full min-w-full text-sm">
+                            <thead>
+                                <tr className="text-muted-foreground">
+                                    <th className="px-2 py-1 text-left">Column</th>
+                                    <th className="px-2 py-1 text-left">Type</th>
+                                    <th className="px-2 py-1 text-center">PK</th>
+                                    <th className="px-2 py-1 text-center">FK</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {table.columns.map((column, colIndex) => (
+                                    <tr
+                                        key={`${column.name}-${colIndex}`}
+                                        className={`border-t ${
+                                            searchQuery &&
+                                            column.name
+                                                .toLowerCase()
+                                                .includes(searchQuery.toLowerCase())
+                                                ? 'bg-primary/10'
+                                                : ''
+                                        }`}
+                                    >
+                                        <td className="px-2 py-1">{column.name}</td>
+                                        <td className="px-2 py-1 text-muted-foreground">
+                                            {column.type}
+                                        </td>
+                                        <td className="px-2 py-1 text-center">
+                                            {column.primaryKey ? (
+                                                <span className="text-primary">✓</span>
+                                            ) : null}
+                                        </td>
+                                        <td className="px-2 py-1 text-center">
+                                            {table.foreignKeys.find(
+                                                (fk) => fk.column === column.name
+                                            ) ? (
+                                                <span className="text-primary">✓</span>
+                                            ) : null}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
 
                     {table.foreignKeys.length > 0 && (
-                        <div className="mt-2 pt-2 text-xs text-muted-foreground">
+                        <div className="mt-2 px-2 pt-2 text-xs text-muted-foreground">
                             <Separator className="mb-2" />
                             <p className="font-semibold">Foreign Keys:</p>
                             <ul className="ml-2 mt-1 list-disc">
