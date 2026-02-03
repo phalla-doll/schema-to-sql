@@ -93,3 +93,4 @@ function Component({ className, variant = 'default', ...props }: Props) {
 - ESLint replaced by Biome
 - Uses Next.js 16 with App Router
 - React 19 with `react-jsx` transform
+- Focus on data model `.local.dataset/*` for now
