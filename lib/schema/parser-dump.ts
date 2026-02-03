@@ -1,5 +1,5 @@
 import type { Table } from '@/types';
-import type { SchemaParser } from './parser';
+import type { ParseResult, SchemaParser } from './parser';
 
 export class DumpParser implements SchemaParser {
     private dbms: string = 'dump';
@@ -12,7 +12,7 @@ export class DumpParser implements SchemaParser {
         return this.dbms;
     }
 
-    parse(content: string): Table[] {
+    parse(content: string): ParseResult {
         const tables: Table[] = [];
         const lines = content.split('\n');
 
@@ -200,6 +200,6 @@ export class DumpParser implements SchemaParser {
             tables.push(currentTable as Table);
         }
 
-        return tables;
+        return { tables, procedures: [] };
     }
 }

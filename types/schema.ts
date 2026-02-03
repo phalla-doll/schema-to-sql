@@ -30,6 +30,14 @@ export interface Table {
     database?: string;
     defaults?: Array<{ column: string; value: string }>;
     indices?: TableIndex[];
+    isView?: boolean;
+}
+
+export interface Procedure {
+    id?: string;
+    name: string;
+    schema?: string;
+    database?: string;
 }
 
 export interface DatabaseSchema {
@@ -38,4 +46,5 @@ export interface DatabaseSchema {
     name: string;
     uploadedAt: string;
     tables: Table[];
+    procedures: Procedure[];
 }

@@ -204,7 +204,14 @@ export function SchemaUpload({ onSchemaLoaded }: SchemaUploadProps) {
                         </div>
                     </div>
 
-                    <SchemaStats tableCount={0} columnCount={0} format={null} uploadedAt={null} />
+                    <SchemaStats
+                        tableCount={0}
+                        columnCount={0}
+                        viewCount={0}
+                        procedureCount={0}
+                        format={null}
+                        uploadedAt={null}
+                    />
                 </CardContent>
             </Card>
         </div>

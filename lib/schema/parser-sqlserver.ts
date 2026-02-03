@@ -1,5 +1,5 @@
-import type { Table } from '@/types';
-import type { SchemaParser } from './parser';
+import type { Procedure, Table } from '@/types';
+import type { ParseResult, SchemaParser } from './parser';
 
 export class SQLServerParser implements SchemaParser {
     detect(sql: string): boolean {
@@ -11,8 +11,9 @@ export class SQLServerParser implements SchemaParser {
         );
     }
 
-    parse(sql: string): Table[] {
+    parse(sql: string): ParseResult {
         const tables: Table[] = [];
+        const procedures: Procedure[] = [];
         const cleanedSql = sql.replace(/\[\dbo\]\./g, '');
 
         const tableMatches = cleanedSql.matchAll(/CREATE TABLE\s+\[(\w+)\]\s*\(([\s\S]*?)\);/gi);
@@ -25,7 +26,27 @@ export class SQLServerParser implements SchemaParser {
             tables.push({ name: tableName, columns, foreignKeys });
         }
 
-        return tables;
+        const viewMatches = cleanedSql.matchAll(
+            /CREATE VIEW\s+\[(\w+)\](?:\s*\(([^)]+)\))?\s+AS\s+SELECT\s+([\s\S]*?);/gi
+        );
+
+        for (const match of viewMatches) {
+            const viewName = match[1];
+            const columnList = match[2];
+            const selectStatement = match[3];
+
+            let columns: Table['columns'] = [];
+
+            if (columnList) {
+                columns = this.parseExplicitViewColumns(columnList);
+            } else {
+                columns = this.parseSelectStatementColumns(selectStatement);
+            }
+
+            tables.push({ name: viewName, columns, foreignKeys: [], isView: true });
+        }
+
+        return { tables, procedures };
     }
 
     private parseTableContent(content: string): {
@@ -78,5 +99,53 @@ export class SQLServerParser implements SchemaParser {
     private extractDefaultValue(rest: string): string | undefined {
         const match = rest.match(/DEFAULT\s+((?:'[^']*'|\S+))/i);
         return match ? match[1].replace(/'/g, '') : undefined;
+    }
+
+    private parseExplicitViewColumns(columnList: string): Table['columns'] {
+        const columns: Table['columns'] = [];
+        const colNames = columnList.split(',').map((c) => c.trim().replace(/\[|\]/g, ''));
+
+        for (const name of colNames) {
+            columns.push({
+                name,
+                type: 'unknown',
+                nullable: true,
+                defaultValue: undefined,
+                primaryKey: false,
+            });
+        }
+
+        return columns;
+    }
+
+    private parseSelectStatementColumns(selectStatement: string): Table['columns'] {
+        const columns: Table['columns'] = [];
+        const selectPart = selectStatement.split(/FROM|WHERE|GROUP BY|HAVING|ORDER BY/i)[0];
+        const columnDefs = selectPart.replace(/SELECT\s+/i, '').split(',');
+
+        for (const def of columnDefs) {
+            let name = def.trim();
+
+            const asMatch = name.match(/\s+(?:AS\s+)?\[?(\w+)\]?\s*$/i);
+            if (asMatch) {
+                name = asMatch[1];
+            } else {
+                name = name.replace(/\[|\]/g, '').split('.').pop() || name;
+            }
+
+            name = name.replace(/\[|\]/g, '').trim();
+
+            if (name && name !== '*') {
+                columns.push({
+                    name,
+                    type: 'unknown',
+                    nullable: true,
+                    defaultValue: undefined,
+                    primaryKey: false,
+                });
+            }
+        }
+
+        return columns;
     }
 }

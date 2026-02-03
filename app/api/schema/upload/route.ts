@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
         }
 
         const parser = createParser(sqlContent);
-        const tables = parser.parse(sqlContent);
+        const result = parser.parse(sqlContent);
 
         let format: 'sqlserver' | 'mysql' | 'dump';
         if (parser instanceof DumpParser) {
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
             .replace(/\.txt$/, '')
             .replace(/\.dump$/, '');
 
-        const schema = normalizeSchema(tables, format, fileName);
+        const schema = normalizeSchema(result, format, fileName);
 
         return NextResponse.json({ schema });
     } catch (error) {

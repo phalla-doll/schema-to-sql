@@ -1,7 +1,12 @@
-import type { DatabaseSchema, Table } from '@/types';
+import type { DatabaseSchema, Procedure, Table } from '@/types';
+import type { ParseResult } from './parser';
 
 function getTableKey(table: Table): string {
     return `${table.database || 'default'}-${table.schema || 'dbo'}-${table.name}`;
+}
+
+function getProcedureKey(procedure: Procedure): string {
+    return `${procedure.database || 'default'}-${procedure.schema || 'dbo'}-${procedure.name}`;
 }
 
 function mergeTables(tables: Table[]): Table[] {
@@ -50,12 +55,27 @@ function deduplicateForeignKeys(foreignKeys: Table['foreignKeys']): Table['forei
     return Array.from(fkMap.values());
 }
 
+function mergeProcedures(procedures: Procedure[]): Procedure[] {
+    const procedureMap = new Map<string, Procedure>();
+
+    procedures.forEach((procedure) => {
+        const key = getProcedureKey(procedure);
+        procedureMap.set(key, procedure);
+    });
+
+    return Array.from(procedureMap.values()).map((procedure) => ({
+        ...procedure,
+        id: crypto.randomUUID(),
+    }));
+}
+
 export function normalizeSchema(
-    tables: Table[],
+    result: ParseResult,
     format: 'sqlserver' | 'mysql' | 'dump',
     name: string
 ): DatabaseSchema {
-    const deduplicatedTables = mergeTables(tables);
+    const deduplicatedTables = mergeTables(result.tables);
+    const deduplicatedProcedures = mergeProcedures(result.procedures);
 
     return {
         id: crypto.randomUUID(),
@@ -63,5 +83,6 @@ export function normalizeSchema(
         name: name || `Uploaded Schema (${format})`,
         uploadedAt: new Date().toISOString(),
         tables: deduplicatedTables,
+        procedures: deduplicatedProcedures,
     };
 }

@@ -6,6 +6,7 @@ import { ChatInput } from '@/components/chat/chat-input';
 import { SchemaSearch } from '@/components/schema/schema-search';
 import { SchemaStats } from '@/components/schema/schema-stats';
 import { SchemaTree } from '@/components/schema/schema-tree';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { SchemaUpload } from '@/components/upload/schema-upload';
 import { useChatHistory, usePreferences, useSchema } from '@/lib/schema/hooks';
 import { schemaStore } from '@/lib/schema/store';
@@ -107,7 +108,9 @@ export default function Page() {
         return <SchemaUpload onSchemaLoaded={handleSchemaLoaded} />;
     }
 
-    const tableCount = schema.tables.length;
+    const tableCount = schema.tables.filter((t) => !t.isView).length;
+    const viewCount = schema.tables.filter((t) => t.isView).length;
+    const procedureCount = schema.procedures?.length || 0;
     const columnCount = schema.tables.reduce((sum, table) => sum + table.columns.length, 0);
 
     return (
@@ -119,6 +122,8 @@ export default function Page() {
                         <SchemaStats
                             tableCount={tableCount}
                             columnCount={columnCount}
+                            viewCount={viewCount}
+                            procedureCount={procedureCount}
                             format={schema.format}
                             uploadedAt={schema.uploadedAt}
                         />
@@ -134,15 +139,17 @@ export default function Page() {
             </header>
 
             <div className="flex flex-1 overflow-hidden">
-                <aside className="w-80 border-r bg-muted/20 p-4 overflow-y-auto">
-                    <div className="mb-4">
-                        <SchemaSearch onSearch={handleSearch} />
-                    </div>
-                    <SchemaTree
-                        schema={schema}
-                        searchQuery={searchQuery}
-                        highlightedTables={highlightedTables}
-                    />
+                <aside className="w-80 border-r bg-muted/20">
+                    <ScrollArea className="h-full p-4">
+                        <div className="mb-4">
+                            <SchemaSearch onSearch={handleSearch} />
+                        </div>
+                        <SchemaTree
+                            schema={schema}
+                            searchQuery={searchQuery}
+                            highlightedTables={highlightedTables}
+                        />
+                    </ScrollArea>
                 </aside>
 
                 <main className="flex flex-1 flex-col">

@@ -1,7 +1,11 @@
 'use client';
 
+import { CodeIcon, DatabaseIcon, EyeIcon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { useState } from 'react';
-import type { DatabaseSchema, Table } from '@/types';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import type { DatabaseSchema, Procedure, Table } from '@/types';
 
 interface SchemaTreeProps {
     schema: DatabaseSchema | null;
@@ -14,19 +18,72 @@ export function SchemaTree({ schema, searchQuery, highlightedTables }: SchemaTre
         return <div className="text-center text-muted-foreground">No schema loaded</div>;
     }
 
+    const tables = schema.tables.filter((t) => !t.isView);
+    const views = schema.tables.filter((t) => t.isView);
+    const procedures = schema.procedures || [];
+
     return (
-        <div className="space-y-2">
-            {schema.tables.map((table, index) => (
-                <TableItem
-                    key={
-                        table.id ||
-                        `${table.database || 'default'}-${table.schema || 'dbo'}-${table.name}-${index}`
-                    }
-                    table={table}
-                    isHighlighted={highlightedTables.has(table.name)}
-                    searchQuery={searchQuery}
-                />
-            ))}
+        <div className="space-y-4">
+            {tables.length > 0 && (
+                <div>
+                    <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                        <HugeiconsIcon icon={DatabaseIcon} strokeWidth={2} className="size-4" />
+                        Tables ({tables.length})
+                    </h3>
+                    <div className="space-y-2">
+                        {tables.map((table, index) => (
+                            <TableItem
+                                key={
+                                    table.id ||
+                                    `${table.database || 'default'}-${table.schema || 'dbo'}-${table.name}-${index}`
+                                }
+                                table={table}
+                                isHighlighted={highlightedTables.has(table.name)}
+                                searchQuery={searchQuery}
+                            />
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {views.length > 0 && (
+                <div>
+                    <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                        <HugeiconsIcon icon={EyeIcon} strokeWidth={2} className="size-4" />
+                        Views ({views.length})
+                    </h3>
+                    <div className="space-y-2">
+                        {views.map((table, index) => (
+                            <TableItem
+                                key={
+                                    table.id ||
+                                    `${table.database || 'default'}-${table.schema || 'dbo'}-${table.name}-${index}`
+                                }
+                                table={table}
+                                isHighlighted={highlightedTables.has(table.name)}
+                                searchQuery={searchQuery}
+                            />
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {procedures.length > 0 && (
+                <div>
+                    <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                        <HugeiconsIcon icon={CodeIcon} strokeWidth={2} className="size-4" />
+                        Procedures ({procedures.length})
+                    </h3>
+                    <div className="space-y-2">
+                        {procedures.map((procedure, index) => (
+                            <ProcedureItem
+                                key={procedure.id || `procedure-${index}`}
+                                procedure={procedure}
+                            />
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
@@ -41,38 +98,43 @@ function TableItem({ table, isHighlighted, searchQuery }: TableItemProps) {
     const [isExpanded, setIsExpanded] = useState(true);
 
     return (
-        <div
-            className={`rounded-lg border transition-colors ${
-                isHighlighted ? 'border-primary bg-primary/5' : 'border-border'
-            }`}
-        >
-            <button
-                type="button"
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="flex w-full items-center justify-between px-3 py-2 text-left"
-            >
-                <span className="font-semibold">{table.name}</span>
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className={`h-4 w-4 transform transition-transform ${
-                        isExpanded ? 'rotate-90' : ''
-                    }`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+        <Card className={`transition-colors ${isHighlighted ? 'bg-primary/5' : ''}`}>
+            <CardHeader>
+                <button
+                    type="button"
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    className="flex w-full items-center justify-between text-left"
                 >
-                    <title>Expand</title>
-                    <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5l7 7-7 7"
-                    />
-                </svg>
-            </button>
+                    <div className="flex items-center gap-2">
+                        <HugeiconsIcon
+                            icon={table.isView ? EyeIcon : DatabaseIcon}
+                            strokeWidth={2}
+                            className="size-4 text-muted-foreground"
+                        />
+                        <span className="font-semibold">{table.name}</span>
+                    </div>
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className={`h-4 w-4 transform transition-transform ${
+                            isExpanded ? 'rotate-90' : ''
+                        }`}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <title>Expand</title>
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5l7 7-7 7"
+                        />
+                    </svg>
+                </button>
+            </CardHeader>
 
             {isExpanded && (
-                <div className="border-t px-3 py-2">
+                <CardContent>
                     <table className="w-full text-sm">
                         <thead>
                             <tr className="text-muted-foreground">
@@ -117,7 +179,8 @@ function TableItem({ table, isHighlighted, searchQuery }: TableItemProps) {
                     </table>
 
                     {table.foreignKeys.length > 0 && (
-                        <div className="mt-2 border-t pt-2 text-xs text-muted-foreground">
+                        <div className="mt-2 pt-2 text-xs text-muted-foreground">
+                            <Separator className="mb-2" />
                             <p className="font-semibold">Foreign Keys:</p>
                             <ul className="ml-2 mt-1 list-disc">
                                 {table.foreignKeys.map((fk, fkIndex) => (
@@ -130,8 +193,29 @@ function TableItem({ table, isHighlighted, searchQuery }: TableItemProps) {
                             </ul>
                         </div>
                     )}
-                </div>
+                </CardContent>
             )}
-        </div>
+        </Card>
+    );
+}
+
+interface ProcedureItemProps {
+    procedure: Procedure;
+}
+
+function ProcedureItem({ procedure }: ProcedureItemProps) {
+    return (
+        <Card>
+            <CardHeader>
+                <div className="flex items-center gap-2">
+                    <HugeiconsIcon
+                        icon={CodeIcon}
+                        strokeWidth={2}
+                        className="size-4 text-muted-foreground"
+                    />
+                    <span className="font-semibold">{procedure.name}</span>
+                </div>
+            </CardHeader>
+        </Card>
     );
 }
