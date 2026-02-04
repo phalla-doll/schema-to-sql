@@ -34,3 +34,19 @@ export function getModelById(id: string): ModelInfo | undefined {
 export function getDefaultModel(): string {
     return 'openrouter/free';
 }
+
+export function getAvailableModels(apiKey: string, customModels: string[]): ModelInfo[] {
+    if (!apiKey) {
+        return [];
+    }
+
+    const customModelInfos: ModelInfo[] = customModels.map((id) => ({
+        id,
+        name: id,
+        provider: 'Custom',
+        isFree: false,
+        isCustom: true,
+    }));
+
+    return [...AVAILABLE_MODELS, ...customModelInfos];
+}

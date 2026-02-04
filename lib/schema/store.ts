@@ -66,24 +66,54 @@ export const chatStore = {
 };
 
 export const prefsStore = {
-    getPreferences(): { model: string; theme: string } {
+    getPreferences(): {
+        model: string;
+        theme: string;
+        openRouterApiKey: string;
+        customModels: string[];
+    } {
         if (typeof window === 'undefined') {
-            return { model: 'openrouter/free', theme: 'light' };
+            return {
+                model: 'openrouter/free',
+                theme: 'light',
+                openRouterApiKey: '',
+                customModels: [],
+            };
         }
         const data = localStorage.getItem(PREFS_KEY);
-        if (!data) return { model: 'openrouter/free', theme: 'light' };
+        if (!data)
+            return {
+                model: 'openrouter/free',
+                theme: 'light',
+                openRouterApiKey: '',
+                customModels: [],
+            };
         try {
             const prefs = JSON.parse(data);
             return {
                 model: prefs.model || 'openrouter/free',
                 theme: prefs.theme || 'light',
+                openRouterApiKey: prefs.openRouterApiKey || '',
+                customModels: Array.isArray(prefs.customModels) ? prefs.customModels : [],
             };
         } catch {
-            return { model: 'openrouter/free', theme: 'light' };
+            return {
+                model: 'openrouter/free',
+                theme: 'light',
+                openRouterApiKey: '',
+                customModels: [],
+            };
         }
     },
 
-    setPreferences(prefs: Partial<{ model: string; theme: string }>): void {
+    setPreferences(
+        prefs: Partial<{
+            model: string;
+            theme: string;
+            openRouterApiKey: string;
+            customModels: string[];
+        }>
+    ): void {
         if (typeof window === 'undefined') return;
         const current = this.getPreferences();
         const updated = { ...current, ...prefs };

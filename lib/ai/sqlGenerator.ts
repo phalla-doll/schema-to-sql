@@ -5,13 +5,14 @@ import { buildPrompt } from './promptBuilder';
 
 export async function generateSQL(
     context: PromptContext,
-    apiKey: string
+    apiKey: string,
+    baseURL = 'https://openrouter.ai/api/v1'
 ): Promise<{ sql: string; explanation?: string }> {
     const { system, user } = buildPrompt(context);
 
     const openai = createOpenAI({
         apiKey,
-        baseURL: 'https://openrouter.ai/api/v1',
+        baseURL,
     });
 
     try {

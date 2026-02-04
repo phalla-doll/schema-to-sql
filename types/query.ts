@@ -23,4 +23,12 @@ export interface ModelInfo {
     name: string;
     provider: string;
     isFree: boolean;
+    isCustom?: boolean;
+}
+
+export interface UserPreferences {
+    model: string;
+    theme: string;
+    openRouterApiKey: string;
+    customModels: string[];
 }

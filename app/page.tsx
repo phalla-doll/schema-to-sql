@@ -15,7 +15,8 @@ import type { DatabaseSchema, Message } from '@/types';
 export default function Page() {
     const { schema, refresh } = useSchema();
     const { messages, addMessage, clearHistory } = useChatHistory();
-    const { model, setModel } = usePreferences();
+    const { model, setModel, openRouterApiKey, setApiKey, customModels, setCustomModels } =
+        usePreferences();
     const [searchQuery, setSearchQuery] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
@@ -97,6 +98,7 @@ export default function Page() {
                         query: message,
                         schema,
                         model,
+                        apiKey: openRouterApiKey,
                     }),
                 });
 
@@ -128,7 +130,7 @@ export default function Page() {
                 setIsLoading(false);
             }
         },
-        [schema, model, addMessage]
+        [schema, model, addMessage, openRouterApiKey]
     );
 
     const handleClearHistory = useCallback(() => {
@@ -200,6 +202,10 @@ export default function Page() {
                             onModelChange={setModel}
                             onSend={handleSendMessage}
                             disabled={isLoading}
+                            apiKey={openRouterApiKey}
+                            customModels={customModels}
+                            setApiKey={setApiKey}
+                            setCustomModels={setCustomModels}
                         />
                     </div>
                 </main>

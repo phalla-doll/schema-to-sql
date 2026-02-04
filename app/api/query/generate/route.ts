@@ -8,18 +8,16 @@ import { matchSchema } from '@/lib/schema/matcher';
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { query, schema, model } = body;
+        const { query, schema, model, apiKey } = body;
 
         if (!query || !schema) {
             return NextResponse.json({ error: 'Query and schema are required' }, { status: 400 });
         }
 
-        const apiKey = process.env.OPENROUTER_API_KEY;
-
         if (!apiKey) {
             return NextResponse.json(
-                { error: 'OpenRouter API key not configured' },
-                { status: 500 }
+                { error: 'API key is required. Please configure it in settings.' },
+                { status: 400 }
             );
         }
 

@@ -110,11 +110,15 @@ function repairMessages(messages: unknown[]): Message[] {
 export function usePreferences() {
     const [model, setModelState] = useState<string>('openrouter/free');
     const [theme, setThemeState] = useState<string>('light');
+    const [openRouterApiKey, setApiKeyState] = useState<string>('');
+    const [customModels, setCustomModelsState] = useState<string[]>([]);
 
     useEffect(() => {
         const prefs = prefsStore.getPreferences();
         setModelState(prefs.model);
         setThemeState(prefs.theme);
+        setApiKeyState(prefs.openRouterApiKey);
+        setCustomModelsState(prefs.customModels);
     }, []);
 
     const setModel = useCallback((newModel: string) => {
@@ -122,5 +126,43 @@ export function usePreferences() {
         prefsStore.setPreferences({ model: newModel });
     }, []);
 
-    return { model, setModel, theme };
+    const setApiKey = useCallback((apiKey: string) => {
+        setApiKeyState(apiKey);
+        prefsStore.setPreferences({ openRouterApiKey: apiKey });
+    }, []);
+
+    const addCustomModel = useCallback((modelId: string) => {
+        if (!modelId.trim()) return;
+        setCustomModelsState((prev) => {
+            if (prev.includes(modelId)) return prev;
+            const updated = [...prev, modelId];
+            prefsStore.setPreferences({ customModels: updated });
+            return updated;
+        });
+    }, []);
+
+    const removeCustomModel = useCallback((modelId: string) => {
+        setCustomModelsState((prev) => {
+            const updated = prev.filter((m) => m !== modelId);
+            prefsStore.setPreferences({ customModels: updated });
+            return updated;
+        });
+    }, []);
+
+    const setCustomModels = useCallback((models: string[]) => {
+        setCustomModelsState(models);
+        prefsStore.setPreferences({ customModels: models });
+    }, []);
+
+    return {
+        model,
+        setModel,
+        theme,
+        openRouterApiKey,
+        setApiKey,
+        customModels,
+        addCustomModel,
+        removeCustomModel,
+        setCustomModels,
+    };
 }

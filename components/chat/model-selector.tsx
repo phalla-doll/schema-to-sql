@@ -8,21 +8,30 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { AVAILABLE_MODELS } from '@/lib/ai/model-selector';
+import { getAvailableModels } from '@/lib/ai/model-selector';
 import type { ModelInfo } from '@/types';
 
 interface ModelSelectorProps {
     model: string;
     onModelChange: (model: string) => void;
+    apiKey: string;
+    customModels: string[];
 }
 
 export const ModelSelector = memo(function ModelSelector({
     model,
     onModelChange,
+    apiKey,
+    customModels,
 }: ModelSelectorProps) {
+    const availableModels = useMemo(
+        () => getAvailableModels(apiKey, customModels),
+        [apiKey, customModels]
+    );
+
     const modelItems = useMemo(
         () =>
-            AVAILABLE_MODELS.map((modelInfo: ModelInfo) => (
+            availableModels.map((modelInfo: ModelInfo) => (
                 <SelectItem key={modelInfo.id} value={modelInfo.id}>
                     <div className="flex items-center gap-2">
                         <span>{modelInfo.name}</span>
@@ -34,15 +43,15 @@ export const ModelSelector = memo(function ModelSelector({
                     </div>
                 </SelectItem>
             )),
-        []
+        [availableModels]
     );
 
     return (
         <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-muted-foreground">Model:</span>
-            <Select value={model} onValueChange={onModelChange}>
+            <Select value={model} onValueChange={onModelChange} disabled={!apiKey}>
                 <SelectTrigger className="w-[200px]">
-                    <SelectValue />
+                    <SelectValue placeholder={!apiKey ? 'Configure API Key' : 'Select a model'} />
                 </SelectTrigger>
                 <SelectContent>{modelItems}</SelectContent>
             </Select>
