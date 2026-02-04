@@ -114,7 +114,7 @@ export function SchemaTree({ schema, tables, views, procedures, searchQuery }: S
         <div className="flex h-full flex-col space-y-4">
             {tables.length > 0 && (
                 <div>
-                    <div className="sticky top-0 z-10 mb-2 flex items-center justify-between bg-background py-2">
+                    <div className="mb-2 flex items-center justify-between">
                         <h3 className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
                             <HugeiconsIcon icon={DatabaseIcon} strokeWidth={2} className="size-4" />
                             Tables ({tables.length})
@@ -264,7 +264,7 @@ function TableItem({ table, isExpanded, onToggle, searchQuery, shouldAutoExpand 
                         strokeWidth={2}
                         className="size-4 text-muted-foreground"
                     />
-                    <span className="font-semibold">{table.name}</span>
+                    <span className="text-sm font-medium">{table.name}</span>
                 </div>
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -380,7 +380,7 @@ function ProcedureItem({ procedure }: ProcedureItemProps) {
                     strokeWidth={2}
                     className="size-4 text-muted-foreground"
                 />
-                <span className="font-medium">{procedure.name}</span>
+                <span className="font-semibold">{procedure.name}</span>
             </div>
         </div>
     );
