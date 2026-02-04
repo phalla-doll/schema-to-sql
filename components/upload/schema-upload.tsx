@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { type KeyboardEvent, useRef, useState } from 'react';
 import { SchemaStats } from '@/components/schema/schema-stats';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -29,6 +29,13 @@ export function SchemaUpload({ onSchemaLoaded }: SchemaUploadProps) {
             setDragActive(true);
         } else if (e.type === 'dragleave') {
             setDragActive(false);
+        }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleBrowseClick();
         }
     };
 
@@ -131,9 +138,9 @@ export function SchemaUpload({ onSchemaLoaded }: SchemaUploadProps) {
                         </p>
                     </div>
 
-                    {/* biome-ignore lint/a11y/noStaticElementInteractions: Valid drag-and-drop drop zone */}
+                    {/* biome-ignore lint/a11y/useSemanticElements: Drag-and-drop drop zone requires custom handling */}
                     <div
-                        className={`mb-6 rounded-lg border-2 border-dashed p-12 text-center transition-colors ${
+                        className={`mb-6 cursor-pointer rounded-lg border-2 border-dashed p-12 text-center transition-colors ${
                             dragActive
                                 ? 'border-primary bg-primary/5'
                                 : 'border-muted-foreground/25 hover:border-primary/50'
@@ -142,6 +149,11 @@ export function SchemaUpload({ onSchemaLoaded }: SchemaUploadProps) {
                         onDragLeave={handleDrag}
                         onDragOver={handleDrag}
                         onDrop={handleDrop}
+                        onClick={handleBrowseClick}
+                        onKeyDown={handleKeyDown}
+                        role="button"
+                        tabIndex={0}
+                        aria-label="Browse files to upload"
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -176,6 +188,7 @@ export function SchemaUpload({ onSchemaLoaded }: SchemaUploadProps) {
                             className="hidden"
                             onChange={handleFileInputChange}
                             disabled={isLoading}
+                            aria-label="Upload schema file"
                         />
                     </div>
 

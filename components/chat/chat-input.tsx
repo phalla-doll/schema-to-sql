@@ -49,9 +49,11 @@ export function ChatInput({ model, onModelChange, onSend, disabled = false }: Ch
                     value={message}
                     onChange={handleInput}
                     onKeyDown={handleKeyDown}
-                    placeholder="Ask about your database... (Cmd+Enter to send)"
+                    placeholder="Ask about your database… (Cmd+Enter to send)"
                     disabled={disabled}
                     className="min-h-[60px] max-h-[200px] resize-none"
+                    name="message"
+                    autoComplete="off"
                 />
                 <Button type="button" onClick={handleSend} disabled={!message.trim() || disabled}>
                     Send

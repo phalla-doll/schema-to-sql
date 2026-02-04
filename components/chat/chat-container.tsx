@@ -12,11 +12,12 @@ interface ChatContainerProps {
 export function ChatContainer({ messages, isLoading = false }: ChatContainerProps) {
     const scrollRef = useRef<HTMLDivElement>(null);
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: Scroll on message/ loading changes
     useEffect(() => {
         if (scrollRef.current) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
-    }, []);
+    }, [messages.length, isLoading]);
 
     if (messages.length === 0 && !isLoading) {
         return (
@@ -27,7 +28,12 @@ export function ChatContainer({ messages, isLoading = false }: ChatContainerProp
     }
 
     return (
-        <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4">
+        <div
+            ref={scrollRef}
+            className="flex-1 overflow-y-auto px-4 py-4"
+            aria-live="polite"
+            aria-atomic="false"
+        >
             {messages.map((message) => (
                 <MessageBubble key={message.id} message={message} />
             ))}

@@ -20,7 +20,9 @@ export function MessageBubble({ message }: MessageBubbleProps) {
                 <p className="mb-2 text-sm">{message.content}</p>
                 {message.sql && <SQLOutput sql={message.sql} />}
                 <p className="mt-2 text-xs text-muted-foreground">
-                    {new Date(message.timestamp).toLocaleTimeString()}
+                    {new Intl.DateTimeFormat(undefined, { timeStyle: 'short' }).format(
+                        new Date(message.timestamp)
+                    )}
                 </p>
             </div>
         </div>
