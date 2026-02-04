@@ -31,15 +31,12 @@ export function MessageBubble({ message }: MessageBubbleProps) {
                     data-role={message.role}
                     className={`${
                         isUser
-                            ? 'bg-primary/5 border-primary/20 dark:bg-primary/10 dark:border-primary/30'
-                            : 'bg-muted/20 border-border'
+                            ? 'bg-primary/10 border-primary/40 dark:bg-primary/15 dark:border-primary/50'
+                            : 'bg-muted/30 border-border'
                     }`}
                 >
                     <CardContent className="px-3 py-2">
                         <div className="mb-1.5 flex items-center gap-2">
-                            <span className="text-xs font-medium">
-                                {isUser ? 'You' : 'Assistant'}
-                            </span>
                             {message.sql && (
                                 <Badge
                                     variant="secondary"
@@ -49,7 +46,9 @@ export function MessageBubble({ message }: MessageBubbleProps) {
                                 </Badge>
                             )}
                         </div>
-                        <p className="mb-2 text-xs leading-relaxed">{message.content}</p>
+                        <p className="mb-2 text-xs leading-relaxed text-foreground">
+                            {message.content}
+                        </p>
                         {message.sql && <SQLOutput sql={message.sql} />}
                         <p className="mt-2 text-[0.625rem] text-muted-foreground">
                             {new Intl.DateTimeFormat(undefined, { timeStyle: 'short' }).format(
