@@ -1,5 +1,6 @@
 'use client';
 
+import { memo, useMemo } from 'react';
 import {
     Select,
     SelectContent,
@@ -15,7 +16,27 @@ interface ModelSelectorProps {
     onModelChange: (model: string) => void;
 }
 
-export function ModelSelector({ model, onModelChange }: ModelSelectorProps) {
+export const ModelSelector = memo(function ModelSelector({
+    model,
+    onModelChange,
+}: ModelSelectorProps) {
+    const modelItems = useMemo(
+        () =>
+            AVAILABLE_MODELS.map((modelInfo: ModelInfo) => (
+                <SelectItem key={modelInfo.id} value={modelInfo.id}>
+                    <div className="flex items-center gap-2">
+                        <span>{modelInfo.name}</span>
+                        {modelInfo.isFree && (
+                            <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-800">
+                                Free
+                            </span>
+                        )}
+                    </div>
+                </SelectItem>
+            )),
+        []
+    );
+
     return (
         <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-muted-foreground">Model:</span>
@@ -23,21 +44,8 @@ export function ModelSelector({ model, onModelChange }: ModelSelectorProps) {
                 <SelectTrigger className="w-[200px]">
                     <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                    {AVAILABLE_MODELS.map((modelInfo: ModelInfo) => (
-                        <SelectItem key={modelInfo.id} value={modelInfo.id}>
-                            <div className="flex items-center gap-2">
-                                <span>{modelInfo.name}</span>
-                                {modelInfo.isFree && (
-                                    <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-800">
-                                        Free
-                                    </span>
-                                )}
-                            </div>
-                        </SelectItem>
-                    ))}
-                </SelectContent>
+                <SelectContent>{modelItems}</SelectContent>
             </Select>
         </div>
     );
-}
+});

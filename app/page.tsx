@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { ChatContainer } from '@/components/chat/chat-container';
 import { ChatInput } from '@/components/chat/chat-input';
 import { SchemaSearch } from '@/components/schema/schema-search';
@@ -8,6 +8,7 @@ import { SchemaStats } from '@/components/schema/schema-stats';
 import { SchemaTree } from '@/components/schema/schema-tree';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { SchemaUpload } from '@/components/upload/schema-upload';
+import { expansionStore } from '@/lib/schema/expansion-store';
 import { useChatHistory, usePreferences, useSchema } from '@/lib/schema/hooks';
 import { schemaStore } from '@/lib/schema/store';
 import type { DatabaseSchema, Message } from '@/types';
@@ -19,99 +20,135 @@ export default function Page() {
     const [searchQuery, setSearchQuery] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const [highlightedTables, setHighlightedTables] = useState<Set<string>>(new Set());
+    const tableCount = useMemo(() => {
+        if (!schema) return 0;
+        return schema.tables.filter((t) => !t.isView).length;
+    }, [schema]);
 
-    const handleSearch = (query: string) => {
+    const viewCount = useMemo(() => {
+        if (!schema) return 0;
+        return schema.tables.filter((t) => t.isView).length;
+    }, [schema]);
+
+    const procedureCount = useMemo(() => {
+        if (!schema) return 0;
+        return schema.procedures?.length || 0;
+    }, [schema]);
+
+    const columnCount = useMemo(() => {
+        if (!schema) return 0;
+        return schema.tables.reduce((sum, table) => sum + table.columns.length, 0);
+    }, [schema]);
+
+    const filteredTables = useMemo(() => {
+        if (!schema) return [];
+        if (!searchQuery) return schema.tables.filter((t) => !t.isView);
+
+        const lowerQuery = searchQuery.toLowerCase();
+        return schema.tables.filter(
+            (table) =>
+                !table.isView &&
+                (table.name.toLowerCase().includes(lowerQuery) ||
+                    table.columns.some((col) => col.name.toLowerCase().includes(lowerQuery)))
+        );
+    }, [schema, searchQuery]);
+
+    const filteredViews = useMemo(() => {
+        if (!schema) return [];
+        if (!searchQuery) return schema.tables.filter((t) => t.isView);
+
+        const lowerQuery = searchQuery.toLowerCase();
+        return schema.tables.filter(
+            (table) =>
+                table.isView &&
+                (table.name.toLowerCase().includes(lowerQuery) ||
+                    table.columns.some((col) => col.name.toLowerCase().includes(lowerQuery)))
+        );
+    }, [schema, searchQuery]);
+
+    const procedures = useMemo(() => {
+        return schema?.procedures || [];
+    }, [schema]);
+
+    const handleSearch = useCallback((query: string) => {
         setSearchQuery(query);
-        if (schema) {
-            const matched = new Set<string>();
-            const lowerQuery = query.toLowerCase();
-            schema.tables.forEach((table) => {
-                if (table.name.toLowerCase().includes(lowerQuery)) {
-                    matched.add(table.name);
-                }
-                table.columns.forEach((column) => {
-                    if (column.name.toLowerCase().includes(lowerQuery)) {
-                        matched.add(table.name);
-                    }
+    }, []);
+
+    const handleSendMessage = useCallback(
+        async (message: string) => {
+            if (!schema) return;
+
+            const userMessage: Message = {
+                id: crypto.randomUUID(),
+                role: 'user',
+                content: message,
+                timestamp: new Date().toISOString(),
+            };
+            addMessage(userMessage);
+
+            setIsLoading(true);
+
+            try {
+                const response = await fetch('/api/query/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: message,
+                        schema,
+                        model,
+                    }),
                 });
-            });
-            setHighlightedTables(matched);
-        }
-    };
 
-    const handleSendMessage = async (message: string) => {
-        if (!schema) return;
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to generate SQL');
+                }
 
-        const userMessage: Message = {
-            id: crypto.randomUUID(),
-            role: 'user',
-            content: message,
-            timestamp: new Date().toISOString(),
-        };
-        addMessage(userMessage);
+                const data = await response.json();
 
-        setIsLoading(true);
-
-        try {
-            const response = await fetch('/api/query/generate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    query: message,
-                    schema,
-                    model,
-                }),
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || 'Failed to generate SQL');
+                const assistantMessage: Message = {
+                    id: crypto.randomUUID(),
+                    role: 'assistant',
+                    content: `Here's a SQL query for your request:`,
+                    sql: data.sql,
+                    timestamp: new Date().toISOString(),
+                };
+                addMessage(assistantMessage);
+            } catch (error) {
+                const errorMessage: Message = {
+                    id: crypto.randomUUID(),
+                    role: 'assistant',
+                    content:
+                        error instanceof Error ? error.message : 'Failed to generate SQL query',
+                    timestamp: new Date().toISOString(),
+                };
+                addMessage(errorMessage);
+            } finally {
+                setIsLoading(false);
             }
+        },
+        [schema, model, addMessage]
+    );
 
-            const data = await response.json();
-
-            const assistantMessage: Message = {
-                id: crypto.randomUUID(),
-                role: 'assistant',
-                content: `Here's a SQL query for your request:`,
-                sql: data.sql,
-                timestamp: new Date().toISOString(),
-            };
-            addMessage(assistantMessage);
-        } catch (error) {
-            const errorMessage: Message = {
-                id: crypto.randomUUID(),
-                role: 'assistant',
-                content: error instanceof Error ? error.message : 'Failed to generate SQL query',
-                timestamp: new Date().toISOString(),
-            };
-            addMessage(errorMessage);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleClearHistory = () => {
+    const handleClearHistory = useCallback(() => {
         clearHistory();
-    };
+    }, [clearHistory]);
 
-    const handleSchemaLoaded = (schema: DatabaseSchema) => {
-        schemaStore.setSchema(schema);
-        refresh();
-        clearHistory();
-    };
+    const handleSchemaLoaded = useCallback(
+        (schema: DatabaseSchema) => {
+            schemaStore.setSchema(schema);
+            refresh();
+            clearHistory();
+            expansionStore.clear();
+        },
+        [refresh, clearHistory]
+    );
 
     if (!schema) {
         return <SchemaUpload onSchemaLoaded={handleSchemaLoaded} />;
     }
-
-    const tableCount = schema.tables.filter((t) => !t.isView).length;
-    const viewCount = schema.tables.filter((t) => t.isView).length;
-    const procedureCount = schema.procedures?.length || 0;
-    const columnCount = schema.tables.reduce((sum, table) => sum + table.columns.length, 0);
 
     return (
         <div className="flex h-screen flex-col">
@@ -146,8 +183,10 @@ export default function Page() {
                         </div>
                         <SchemaTree
                             schema={schema}
+                            tables={filteredTables}
+                            views={filteredViews}
+                            procedures={procedures}
                             searchQuery={searchQuery}
-                            highlightedTables={highlightedTables}
                         />
                     </ScrollArea>
                 </aside>
