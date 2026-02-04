@@ -4,7 +4,6 @@ import { CodeIcon, DatabaseIcon, EyeIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { expansionStore } from '@/lib/schema/expansion-store';
 import type { DatabaseSchema, Procedure, Table } from '@/types';
@@ -95,13 +94,13 @@ export function SchemaTree({ schema, tables, views, procedures, searchQuery }: S
         count: allItems.length,
         getScrollElement: () => parentRef.current,
         estimateSize: useCallback(() => {
-            const avgExpandedHeight = 350;
-            const avgCollapsedHeight = 60;
+            const avgExpandedHeight = 280;
+            const avgCollapsedHeight = 48;
             return allExpanded ? avgExpandedHeight : avgCollapsedHeight;
         }, [allExpanded]),
         overscan: 10,
         measureElement: useCallback((element: Element | null) => {
-            return element?.getBoundingClientRect().height || 60;
+            return element?.getBoundingClientRect().height || 48;
         }, []),
     });
 
@@ -115,7 +114,7 @@ export function SchemaTree({ schema, tables, views, procedures, searchQuery }: S
         <div className="flex h-full flex-col space-y-4">
             {tables.length > 0 && (
                 <div>
-                    <div className="mb-2 flex items-center justify-between">
+                    <div className="sticky top-0 z-10 mb-2 flex items-center justify-between bg-background py-2">
                         <h3 className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
                             <HugeiconsIcon icon={DatabaseIcon} strokeWidth={2} className="size-4" />
                             Tables ({tables.length})
@@ -132,7 +131,7 @@ export function SchemaTree({ schema, tables, views, procedures, searchQuery }: S
                     </div>
                     <div ref={parentRef} className="flex-1 overflow-y-auto">
                         {isLoading ? (
-                            <div className="space-y-2 p-2">
+                            <div className="space-y-2 p-1">
                                 {[
                                     'loading-1',
                                     'loading-2',
@@ -142,7 +141,7 @@ export function SchemaTree({ schema, tables, views, procedures, searchQuery }: S
                                 ].map((id) => (
                                     <div
                                         key={id}
-                                        className="h-12 animate-pulse rounded-lg bg-muted/30"
+                                        className="h-12 animate-pulse border-l-2 border-muted bg-muted/30"
                                     />
                                 ))}
                             </div>
@@ -162,7 +161,7 @@ export function SchemaTree({ schema, tables, views, procedures, searchQuery }: S
                                             key={item.id}
                                             data-index={virtualRow.index}
                                             ref={rowVirtualizer.measureElement}
-                                            className="px-1"
+                                            className="p-1"
                                             style={{
                                                 position: 'absolute',
                                                 top: 0,
@@ -251,42 +250,40 @@ function TableItem({ table, isExpanded, onToggle, searchQuery, shouldAutoExpand 
     }, [isExpanded, detailsVisible]);
 
     return (
-        <Card
-            className={`transition-colors ${searchQuery && shouldAutoExpand ? 'bg-primary/5' : ''}`}
+        <div
+            className={`border-l-2 border-primary transition-colors hover:bg-muted/50 ${searchQuery && shouldAutoExpand ? 'bg-primary/5' : ''}`}
         >
-            <CardHeader>
-                <button
-                    type="button"
-                    onClick={onToggle}
-                    className="flex w-full items-center justify-between text-left"
+            <button
+                type="button"
+                onClick={onToggle}
+                className="flex w-full items-center justify-between px-3 py-2 text-left"
+            >
+                <div className="flex items-center gap-2">
+                    <HugeiconsIcon
+                        icon={table.isView ? EyeIcon : DatabaseIcon}
+                        strokeWidth={2}
+                        className="size-4 text-muted-foreground"
+                    />
+                    <span className="font-semibold">{table.name}</span>
+                </div>
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className={`h-4 w-4 transform transition-transform ${
+                        isExpanded ? 'rotate-90' : ''
+                    }`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
                 >
-                    <div className="flex items-center gap-2">
-                        <HugeiconsIcon
-                            icon={table.isView ? EyeIcon : DatabaseIcon}
-                            strokeWidth={2}
-                            className="size-4 text-muted-foreground"
-                        />
-                        <span className="font-semibold">{table.name}</span>
-                    </div>
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className={`h-4 w-4 transform transition-transform ${
-                            isExpanded ? 'rotate-90' : ''
-                        }`}
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                    >
-                        <title>Expand</title>
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 5l7 7-7 7"
-                        />
-                    </svg>
-                </button>
-            </CardHeader>
+                    <title>Expand</title>
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                    />
+                </svg>
+            </button>
 
             {isExpanded && detailsVisible && (
                 <MemoizedTableDetails
@@ -295,7 +292,7 @@ function TableItem({ table, isExpanded, onToggle, searchQuery, shouldAutoExpand 
                     shouldAutoExpand={shouldAutoExpand}
                 />
             )}
-        </Card>
+        </div>
     );
 }
 
@@ -310,7 +307,7 @@ function TableDetails({ table, searchQuery, shouldAutoExpand }: TableDetailsProp
     const foreignKeys = useMemo(() => table.foreignKeys, [table.foreignKeys]);
 
     return (
-        <CardContent className="p-0 px-2">
+        <div className="px-3">
             <div className="overflow-x-auto">
                 <table className="w-full min-w-full text-sm">
                     <thead>
@@ -354,7 +351,7 @@ function TableDetails({ table, searchQuery, shouldAutoExpand }: TableDetailsProp
             </div>
 
             {foreignKeys.length > 0 && (
-                <div className="mt-2 px-2 pt-2 text-xs text-muted-foreground">
+                <div className="mt-2 py-2 text-xs text-muted-foreground">
                     <Separator className="mb-2" />
                     <p className="font-semibold">Foreign Keys:</p>
                     <ul className="ml-2 mt-1 list-disc">
@@ -366,7 +363,7 @@ function TableDetails({ table, searchQuery, shouldAutoExpand }: TableDetailsProp
                     </ul>
                 </div>
             )}
-        </CardContent>
+        </div>
     );
 }
 
@@ -376,18 +373,16 @@ interface ProcedureItemProps {
 
 function ProcedureItem({ procedure }: ProcedureItemProps) {
     return (
-        <Card>
-            <CardHeader>
-                <div className="flex items-center gap-2">
-                    <HugeiconsIcon
-                        icon={CodeIcon}
-                        strokeWidth={2}
-                        className="size-4 text-muted-foreground"
-                    />
-                    <span className="font-semibold">{procedure.name}</span>
-                </div>
-            </CardHeader>
-        </Card>
+        <div className="border-l-2 border-muted-foreground/30">
+            <div className="flex items-center gap-2 px-3 py-2">
+                <HugeiconsIcon
+                    icon={CodeIcon}
+                    strokeWidth={2}
+                    className="size-4 text-muted-foreground"
+                />
+                <span className="font-medium">{procedure.name}</span>
+            </div>
+        </div>
     );
 }
 

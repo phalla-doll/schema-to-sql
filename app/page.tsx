@@ -6,7 +6,6 @@ import { ChatInput } from '@/components/chat/chat-input';
 import { SchemaSearch } from '@/components/schema/schema-search';
 import { SchemaStats } from '@/components/schema/schema-stats';
 import { SchemaTree } from '@/components/schema/schema-tree';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { SchemaUpload } from '@/components/upload/schema-upload';
 import { expansionStore } from '@/lib/schema/expansion-store';
 import { useChatHistory, usePreferences, useSchema } from '@/lib/schema/hooks';
@@ -176,19 +175,21 @@ export default function Page() {
             </header>
 
             <div className="flex flex-1 overflow-hidden">
-                <aside className="w-120 border-r bg-muted/20">
-                    <ScrollArea className="h-full p-4">
-                        <div className="mb-4">
-                            <SchemaSearch onSearch={handleSearch} />
+                <aside className="flex w-120 flex-col border-r bg-muted/20">
+                    <div className="border-b bg-muted/20 p-4">
+                        <SchemaSearch onSearch={handleSearch} />
+                    </div>
+                    <div className="flex-1 overflow-y-auto">
+                        <div className="p-4">
+                            <SchemaTree
+                                schema={schema}
+                                tables={filteredTables}
+                                views={filteredViews}
+                                procedures={procedures}
+                                searchQuery={searchQuery}
+                            />
                         </div>
-                        <SchemaTree
-                            schema={schema}
-                            tables={filteredTables}
-                            views={filteredViews}
-                            procedures={procedures}
-                            searchQuery={searchQuery}
-                        />
-                    </ScrollArea>
+                    </div>
                 </aside>
 
                 <main className="flex flex-1 flex-col">
