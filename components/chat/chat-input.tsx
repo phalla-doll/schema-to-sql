@@ -1,10 +1,17 @@
 'use client';
 
-import { Setting06Icon } from '@hugeicons/core-free-icons';
+import { ArrowRight01Icon, Setting06Icon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { type KeyboardEvent, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+import {
+    InputGroup,
+    InputGroupAddon,
+    InputGroupButton,
+    InputGroupText,
+    InputGroupTextarea,
+} from '@/components/ui/input-group';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ModelSelector } from './model-selector';
 import { SettingsDialog } from './settings-dialog';
 
@@ -63,7 +70,7 @@ export function ChatInput({
     };
 
     return (
-        <div className="space-y-2">
+        <div className="space-y-3">
             <div className="flex items-center gap-2">
                 <ModelSelector
                     model={model}
@@ -71,14 +78,19 @@ export function ChatInput({
                     apiKey={apiKey}
                     customModels={customModels}
                 />
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="icon-sm"
-                    onClick={() => setSettingsOpen(true)}
-                >
-                    <HugeiconsIcon icon={Setting06Icon} strokeWidth={2} />
-                </Button>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="icon-sm"
+                            onClick={() => setSettingsOpen(true)}
+                        >
+                            <HugeiconsIcon icon={Setting06Icon} strokeWidth={2} />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Settings</TooltipContent>
+                </Tooltip>
                 <SettingsDialog
                     open={settingsOpen}
                     onOpenChange={setSettingsOpen}
@@ -87,22 +99,39 @@ export function ChatInput({
                     onSave={handleSettingsSave}
                 />
             </div>
-            <div className="flex gap-2">
-                <Textarea
-                    ref={textareaRef}
-                    value={message}
-                    onChange={handleInput}
-                    onKeyDown={handleKeyDown}
-                    placeholder="Ask about your database… (Cmd+Enter to send)"
-                    disabled={disabled}
-                    className="min-h-[60px] max-h-[200px] resize-none"
-                    name="message"
-                    autoComplete="off"
-                />
-                <Button type="button" onClick={handleSend} disabled={!message.trim() || disabled}>
-                    Send
-                </Button>
-            </div>
+            <InputGroup>
+                <InputGroupAddon align="block-start">
+                    <InputGroupTextarea
+                        ref={textareaRef}
+                        value={message}
+                        onChange={handleInput}
+                        onKeyDown={handleKeyDown}
+                        placeholder="Ask about your database… (Cmd+Enter to send)"
+                        disabled={disabled}
+                        className="min-h-[48px] max-h-[150px] resize-none"
+                        name="message"
+                        autoComplete="off"
+                    />
+                </InputGroupAddon>
+                <div className="flex items-center gap-1 px-2 pb-2">
+                    <InputGroupText className="text-[0.625rem] text-muted-foreground">
+                        Cmd+Enter to send
+                    </InputGroupText>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <InputGroupButton
+                                type="button"
+                                variant={message.trim() ? 'default' : 'ghost'}
+                                onClick={handleSend}
+                                disabled={!message.trim() || disabled}
+                            >
+                                <HugeiconsIcon icon={ArrowRight01Icon} strokeWidth={2} />
+                            </InputGroupButton>
+                        </TooltipTrigger>
+                        <TooltipContent>Send message</TooltipContent>
+                    </Tooltip>
+                </div>
+            </InputGroup>
         </div>
     );
 }
