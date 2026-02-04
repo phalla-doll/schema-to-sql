@@ -8,6 +8,9 @@ import { Separator } from '@/components/ui/separator';
 import { expansionStore } from '@/lib/schema/expansion-store';
 import type { DatabaseSchema, Procedure, Table } from '@/types';
 
+const AVG_EXPANDED_HEIGHT = 280;
+const AVG_COLLAPSED_HEIGHT = 48;
+
 interface SchemaTreeProps {
     schema: DatabaseSchema | null;
     tables: Table[];
@@ -20,7 +23,9 @@ export function SchemaTree({ schema, tables, views, procedures, searchQuery }: S
     const [allExpanded, setAllExpanded] = useState(false);
     const [expansionStates, setExpansionStates] = useState<Record<string, boolean>>({});
     const [isLoading, setIsLoading] = useState(false);
-    const parentRef = useRef<HTMLDivElement>(null);
+    const tablesRef = useRef<HTMLDivElement>(null);
+    const viewsRef = useRef<HTMLDivElement>(null);
+    const proceduresRef = useRef<HTMLDivElement>(null);
 
     const getTableId = useCallback((table: Table, index: number): string => {
         return (
@@ -81,30 +86,66 @@ export function SchemaTree({ schema, tables, views, procedures, searchQuery }: S
         });
     }, []);
 
-    const allItems = useMemo(() => {
-        return [...tables, ...views].map((table, index) => ({
+    const tablesData = useMemo(() => {
+        return tables.map((table, index) => ({
             table,
-            index,
             id: getTableId(table, index),
-            type: index < tables.length ? 'table' : 'view',
         }));
-    }, [tables, views, getTableId]);
+    }, [tables, getTableId]);
 
-    const rowVirtualizer = useVirtualizer({
-        count: allItems.length,
-        getScrollElement: () => parentRef.current,
-        estimateSize: useCallback(() => {
-            const avgExpandedHeight = 280;
-            const avgCollapsedHeight = 48;
-            return allExpanded ? avgExpandedHeight : avgCollapsedHeight;
-        }, [allExpanded]),
+    const viewsData = useMemo(() => {
+        return views.map((table, index) => ({
+            table,
+            id: getTableId(table, index + tables.length),
+        }));
+    }, [views, tables.length, getTableId]);
+
+    const estimateItemSize = useCallback(
+        (itemId: string) => {
+            return expansionStates[itemId] ? AVG_EXPANDED_HEIGHT : AVG_COLLAPSED_HEIGHT;
+        },
+        [expansionStates]
+    );
+
+    const tablesVirtualizer = useVirtualizer({
+        count: tablesData.length,
+        getScrollElement: () => tablesRef.current,
+        estimateSize: useCallback(
+            (index) => estimateItemSize(tablesData[index]?.id || ''),
+            [tablesData, estimateItemSize]
+        ),
+        overscan: 10,
+        measureElement: useCallback((element: Element | null) => {
+            return element?.getBoundingClientRect().height || AVG_COLLAPSED_HEIGHT;
+        }, []),
+    });
+
+    const viewsVirtualizer = useVirtualizer({
+        count: viewsData.length,
+        getScrollElement: () => viewsRef.current,
+        estimateSize: useCallback(
+            (index) => estimateItemSize(viewsData[index]?.id || ''),
+            [viewsData, estimateItemSize]
+        ),
+        overscan: 10,
+        measureElement: useCallback((element: Element | null) => {
+            return element?.getBoundingClientRect().height || AVG_COLLAPSED_HEIGHT;
+        }, []),
+    });
+
+    const proceduresVirtualizer = useVirtualizer({
+        count: procedures.length,
+        getScrollElement: () => proceduresRef.current,
+        estimateSize: () => 48,
         overscan: 10,
         measureElement: useCallback((element: Element | null) => {
             return element?.getBoundingClientRect().height || 48;
         }, []),
     });
 
-    const virtualRows = rowVirtualizer.getVirtualItems();
+    const tablesVirtualRows = tablesVirtualizer.getVirtualItems();
+    const viewsVirtualRows = viewsVirtualizer.getVirtualItems();
+    const proceduresVirtualRows = proceduresVirtualizer.getVirtualItems();
 
     if (!schema) {
         return <div className="text-center text-muted-foreground">No schema loaded</div>;
@@ -113,8 +154,8 @@ export function SchemaTree({ schema, tables, views, procedures, searchQuery }: S
     return (
         <div className="flex h-full flex-col space-y-4">
             {tables.length > 0 && (
-                <div>
-                    <div className="mb-2 flex items-center justify-between">
+                <div className="flex-1 flex flex-col min-h-0">
+                    <div className="mb-2 flex items-center justify-between shrink-0">
                         <h3 className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
                             <HugeiconsIcon icon={DatabaseIcon} strokeWidth={2} className="size-4" />
                             Tables ({tables.length})
@@ -129,7 +170,7 @@ export function SchemaTree({ schema, tables, views, procedures, searchQuery }: S
                             </button>
                         )}
                     </div>
-                    <div ref={parentRef} className="flex-1 overflow-y-auto">
+                    <div ref={tablesRef} className="flex-1 overflow-y-auto">
                         {isLoading ? (
                             <div className="space-y-2 p-1">
                                 {[
@@ -148,19 +189,19 @@ export function SchemaTree({ schema, tables, views, procedures, searchQuery }: S
                         ) : (
                             <div
                                 style={{
-                                    height: `${rowVirtualizer.getTotalSize()}px`,
+                                    height: `${tablesVirtualizer.getTotalSize()}px`,
                                     position: 'relative',
                                 }}
                             >
-                                {virtualRows.map((virtualRow) => {
-                                    const item = allItems[virtualRow.index];
+                                {tablesVirtualRows.map((virtualRow) => {
+                                    const item = tablesData[virtualRow.index];
                                     const isExpanded = expansionStates[item.id] || false;
 
                                     return (
                                         <div
                                             key={item.id}
                                             data-index={virtualRow.index}
-                                            ref={rowVirtualizer.measureElement}
+                                            ref={tablesVirtualizer.measureElement}
                                             className="p-1"
                                             style={{
                                                 position: 'absolute',
@@ -187,43 +228,84 @@ export function SchemaTree({ schema, tables, views, procedures, searchQuery }: S
             )}
 
             {views.length > 0 && (
-                <div>
-                    <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                <div className="flex-1 flex flex-col min-h-0">
+                    <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-muted-foreground shrink-0">
                         <HugeiconsIcon icon={EyeIcon} strokeWidth={2} className="size-4" />
                         Views ({views.length})
                     </h3>
-                    <div className="space-y-2">
-                        {views.map((table, index) => {
-                            const id = getTableId(table, index + tables.length);
-                            const isExpanded = expansionStates[id] || false;
-                            return (
-                                <MemoizedTableItem
-                                    key={id}
-                                    table={table}
-                                    isExpanded={isExpanded}
-                                    onToggle={() => handleTableToggle(id)}
-                                    searchQuery={searchQuery}
-                                    shouldAutoExpand={!!searchQuery}
-                                />
-                            );
-                        })}
+                    <div ref={viewsRef} className="flex-1 overflow-y-auto">
+                        <div
+                            style={{
+                                height: `${viewsVirtualizer.getTotalSize()}px`,
+                                position: 'relative',
+                            }}
+                        >
+                            {viewsVirtualRows.map((virtualRow) => {
+                                const item = viewsData[virtualRow.index];
+                                const isExpanded = expansionStates[item.id] || false;
+                                return (
+                                    <div
+                                        key={item.id}
+                                        data-index={virtualRow.index}
+                                        ref={viewsVirtualizer.measureElement}
+                                        className="p-1"
+                                        style={{
+                                            position: 'absolute',
+                                            top: 0,
+                                            left: 0,
+                                            width: '100%',
+                                            transform: `translateY(${virtualRow.start}px)`,
+                                        }}
+                                    >
+                                        <MemoizedTableItem
+                                            table={item.table}
+                                            isExpanded={isExpanded}
+                                            onToggle={() => handleTableToggle(item.id)}
+                                            searchQuery={searchQuery}
+                                            shouldAutoExpand={!!searchQuery}
+                                        />
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
             )}
 
             {procedures.length > 0 && (
-                <div>
-                    <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                <div className="flex-1 flex flex-col min-h-0">
+                    <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-muted-foreground shrink-0">
                         <HugeiconsIcon icon={CodeIcon} strokeWidth={2} className="size-4" />
                         Procedures ({procedures.length})
                     </h3>
-                    <div className="space-y-2">
-                        {procedures.map((procedure, index) => (
-                            <MemoizedProcedureItem
-                                key={procedure.id || `procedure-${index}`}
-                                procedure={procedure}
-                            />
-                        ))}
+                    <div ref={proceduresRef} className="flex-1 overflow-y-auto">
+                        <div
+                            style={{
+                                height: `${proceduresVirtualizer.getTotalSize()}px`,
+                                position: 'relative',
+                            }}
+                        >
+                            {proceduresVirtualRows.map((virtualRow) => {
+                                const procedure = procedures[virtualRow.index];
+                                return (
+                                    <div
+                                        key={procedure.id || `procedure-${virtualRow.index}`}
+                                        data-index={virtualRow.index}
+                                        ref={proceduresVirtualizer.measureElement}
+                                        className="p-1"
+                                        style={{
+                                            position: 'absolute',
+                                            top: 0,
+                                            left: 0,
+                                            width: '100%',
+                                            transform: `translateY(${virtualRow.start}px)`,
+                                        }}
+                                    >
+                                        <MemoizedProcedureItem procedure={procedure} />
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
             )}

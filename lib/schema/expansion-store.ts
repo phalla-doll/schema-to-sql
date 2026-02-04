@@ -1,10 +1,14 @@
 'use client';
 
 const EXPANSION_KEY = 'schema-to-sql:table-expansion';
+const DEBOUNCE_DELAY = 300;
 
 export interface ExpansionState {
     [tableId: string]: boolean;
 }
+
+let pendingState: ExpansionState | null = null;
+let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
 export const expansionStore = {
     getState(): ExpansionState {
@@ -20,9 +24,10 @@ export const expansionStore = {
 
     setExpanded(tableId: string, isExpanded: boolean): void {
         if (typeof window === 'undefined') return;
-        const state = this.getState();
+        const state = pendingState || this.getState();
         state[tableId] = isExpanded;
-        localStorage.setItem(EXPANSION_KEY, JSON.stringify(state));
+        pendingState = state;
+        this.debouncedSave(state);
     },
 
     setAllExpanded(tableIds: string[], isExpanded: boolean): void {
@@ -31,11 +36,33 @@ export const expansionStore = {
         tableIds.forEach((id) => {
             state[id] = isExpanded;
         });
+        pendingState = state;
         localStorage.setItem(EXPANSION_KEY, JSON.stringify(state));
+        this.clearDebounce();
     },
 
     clear(): void {
         if (typeof window === 'undefined') return;
+        this.clearDebounce();
+        pendingState = null;
         localStorage.removeItem(EXPANSION_KEY);
+    },
+
+    debouncedSave(state: ExpansionState): void {
+        if (debounceTimer) {
+            clearTimeout(debounceTimer);
+        }
+        debounceTimer = setTimeout(() => {
+            localStorage.setItem(EXPANSION_KEY, JSON.stringify(state));
+            pendingState = null;
+            debounceTimer = null;
+        }, DEBOUNCE_DELAY);
+    },
+
+    clearDebounce(): void {
+        if (debounceTimer) {
+            clearTimeout(debounceTimer);
+            debounceTimer = null;
+        }
     },
 };
