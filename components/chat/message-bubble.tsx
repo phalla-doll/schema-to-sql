@@ -14,7 +14,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
 
     return (
         <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
-            <div className={`flex gap-2.5 ${isUser ? 'flex-row-reverse' : 'flex-row'} max-w-[85%]`}>
+            <div className={`flex gap-2.5 ${isUser ? 'flex-row-reverse' : 'flex-row'} max-w-[70%]`}>
                 <div
                     className={`flex shrink-0 items-center justify-center rounded-sm ${
                         isUser
@@ -27,7 +27,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
                 <div
                     data-slot="message-bubble"
                     data-role={message.role}
-                    className={`flex max-w-full flex-col ${isUser ? 'items-end' : 'items-start'}`}
+                    className={`flex max-w-[100%] flex-col ${isUser ? 'items-end' : 'items-start'}`}
                 >
                     <div className="rounded-sm border-2 border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-900">
                         <div className="mb-2 flex items-center gap-2">
