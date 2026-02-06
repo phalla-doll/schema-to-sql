@@ -2,8 +2,6 @@
 
 import { User02Icon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import type { Message } from '@/types';
 import { SQLOutput } from './sql-output';
 
@@ -15,48 +13,41 @@ export function MessageBubble({ message }: MessageBubbleProps) {
     const isUser = message.role === 'user';
 
     return (
-        <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-3`}>
-            <div className={`flex gap-2 ${isUser ? 'flex-row-reverse' : 'flex-row'} max-w-[85%]`}>
+        <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
+            <div className={`flex gap-2.5 ${isUser ? 'flex-row-reverse' : 'flex-row'} max-w-[85%]`}>
                 <div
-                    className={`flex shrink-0 items-center justify-center rounded-md ${
+                    className={`flex shrink-0 items-center justify-center rounded-sm ${
                         isUser
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-muted text-muted-foreground'
+                            ? 'bg-black text-white dark:bg-white dark:text-black'
+                            : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
                     } size-8`}
                 >
-                    <HugeiconsIcon icon={User02Icon} strokeWidth={2} className="size-4" />
+                    <HugeiconsIcon icon={User02Icon} strokeWidth={2} className="size-3.5" />
                 </div>
-                <Card
+                <div
                     data-slot="message-bubble"
                     data-role={message.role}
-                    className={`${
-                        isUser
-                            ? 'bg-primary/10 border-primary/40 dark:bg-primary/15 dark:border-primary/50'
-                            : 'bg-muted/30 border-border'
-                    }`}
+                    className={`flex max-w-full flex-col ${isUser ? 'items-end' : 'items-start'}`}
                 >
-                    <CardContent className="px-3 py-2">
-                        <div className="mb-1.5 flex items-center gap-2">
+                    <div className="rounded-sm border-2 border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-900">
+                        <div className="mb-2 flex items-center gap-2">
                             {message.sql && (
-                                <Badge
-                                    variant="secondary"
-                                    className="h-4.5 px-1.5 py-0 text-[0.5625rem]"
-                                >
+                                <span className="rounded bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
                                     SQL
-                                </Badge>
+                                </span>
                             )}
                         </div>
-                        <p className="mb-2 text-xs leading-relaxed text-foreground">
+                        <p className="mb-3 text-sm leading-relaxed text-black dark:text-white">
                             {message.content}
                         </p>
                         {message.sql && <SQLOutput sql={message.sql} />}
-                        <p className="mt-2 text-[0.625rem] text-muted-foreground">
+                        <p className="text-xs text-gray-400 dark:text-gray-600">
                             {new Intl.DateTimeFormat(undefined, { timeStyle: 'short' }).format(
                                 new Date(message.timestamp)
                             )}
                         </p>
-                    </CardContent>
-                </Card>
+                    </div>
+                </div>
             </div>
         </div>
     );

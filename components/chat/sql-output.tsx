@@ -1,8 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 
 interface SQLOutputProps {
     sql: string;
@@ -19,23 +17,21 @@ export function SQLOutput({ sql, dialect = 'mysql' }: SQLOutputProps) {
     };
 
     return (
-        <div className="relative mt-2 overflow-hidden rounded-lg bg-black text-white">
-            <div className="flex items-center justify-between border-b border-gray-700 bg-gray-900 px-3 py-2">
-                <Badge variant="outline" className="text-xs">
+        <div className="mt-2 overflow-hidden rounded-sm border-2 border-gray-200 bg-gray-900 dark:border-gray-700 dark:bg-black">
+            <div className="flex items-center justify-between border-b border-gray-700 bg-gray-800 px-3 py-2 dark:border-gray-600 dark:bg-gray-950">
+                <span className="text-xs font-semibold text-white dark:text-gray-200">
                     SQL {dialect.toUpperCase()}
-                </Badge>
-                <Button
+                </span>
+                <button
                     type="button"
-                    variant="ghost"
-                    size="sm"
                     onClick={handleCopy}
-                    className="h-6 text-xs"
+                    className="text-xs font-medium text-white hover:text-blue-400 dark:text-gray-300 dark:hover:text-blue-300"
                 >
                     {copied ? 'Copied!' : 'Copy'}
-                </Button>
+                </button>
             </div>
             <pre className="overflow-x-auto p-4">
-                <code>{sql}</code>
+                <code className="text-xs text-gray-300 dark:text-gray-400">{sql}</code>
             </pre>
         </div>
     );

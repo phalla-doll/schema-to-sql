@@ -152,51 +152,49 @@ export default function Page() {
     }
 
     return (
-        <div className="flex h-screen flex-col">
-            <header className="border-b bg-background p-4">
-                <div className="mx-auto flex max-w-7xl items-center justify-between">
-                    <h1 className="text-2xl font-bold">Schema-to-SQL AI</h1>
-                    <div className="flex items-center gap-4">
-                        <SchemaStats
-                            tableCount={tableCount}
-                            columnCount={columnCount}
-                            viewCount={viewCount}
-                            procedureCount={procedureCount}
-                            format={schema.format}
-                            uploadedAt={schema.uploadedAt}
-                        />
-                        <button
-                            type="button"
-                            onClick={handleClearHistory}
-                            className="rounded-md border px-3 py-2 text-sm hover:bg-muted"
-                        >
-                            Clear Chat
-                        </button>
-                    </div>
+        <div className="flex h-screen flex-col border-r border-gray-200 dark:border-gray-700">
+            <header className="flex items-center justify-between border-b-2 border-black px-6 py-4">
+                <div className="flex items-center gap-3">
+                    <h1 className="text-lg font-semibold tracking-tight">Schema-to-SQL</h1>
+                </div>
+                <div className="flex items-center gap-4">
+                    <SchemaStats
+                        tableCount={tableCount}
+                        columnCount={columnCount}
+                        viewCount={viewCount}
+                        procedureCount={procedureCount}
+                        format={schema.format}
+                        uploadedAt={schema.uploadedAt}
+                    />
+                    <button
+                        type="button"
+                        onClick={handleClearHistory}
+                        className="rounded-sm border-2 border-gray-200 px-4 py-2 text-sm font-medium hover:bg-gray-100 hover:border-black dark:border-gray-700 dark:hover:bg-white/5 dark:hover:border-white"
+                    >
+                        Clear Chat
+                    </button>
                 </div>
             </header>
 
             <div className="flex flex-1 overflow-hidden">
-                <aside className="flex w-120 flex-col border-r bg-muted/20">
-                    <div className="border-b bg-muted/20 p-4">
+                <aside className="flex w-[280px] flex-col border-r border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-900/50">
+                    <div className="border-b border-gray-200 px-4 py-3 dark:border-gray-700">
                         <SchemaSearch onSearch={handleSearch} />
                     </div>
-                    <div className="flex-1 overflow-y-auto">
-                        <div className="p-4">
-                            <SchemaTree
-                                schema={schema}
-                                tables={filteredTables}
-                                views={filteredViews}
-                                procedures={procedures}
-                                searchQuery={searchQuery}
-                            />
-                        </div>
+                    <div className="flex-1 overflow-y-auto p-3">
+                        <SchemaTree
+                            schema={schema}
+                            tables={filteredTables}
+                            views={filteredViews}
+                            procedures={procedures}
+                            searchQuery={searchQuery}
+                        />
                     </div>
                 </aside>
 
                 <main className="flex flex-1 flex-col">
                     <ChatContainer messages={messages} isLoading={isLoading} />
-                    <div className="border-t bg-background p-4">
+                    <div className="border-t border-gray-200 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-900">
                         <ChatInput
                             model={model}
                             onModelChange={setModel}

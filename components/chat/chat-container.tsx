@@ -3,7 +3,6 @@
 import { Message01Icon, SparklesIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { useEffect, useRef } from 'react';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -27,36 +26,35 @@ export function ChatContainer({ messages, isLoading = false }: ChatContainerProp
 
     if (messages.length === 0 && !isLoading) {
         return (
-            <div className="flex h-full items-center justify-center px-4">
-                <Card className="border-dashed bg-muted/20 max-w-md text-center">
-                    <CardContent className="space-y-3 px-6 py-8">
-                        <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-primary/10">
+            <div className="flex h-full items-center justify-center px-6">
+                <div className="w-full max-w-lg">
+                    <div className="mb-6 flex justify-center">
+                        <div className="flex h-14 w-14 items-center justify-center rounded-sm bg-black px-4 dark:bg-white dark:px-4">
                             <HugeiconsIcon
                                 icon={Message01Icon}
                                 strokeWidth={2}
-                                className="size-6 text-primary"
+                                className="size-7 text-white dark:text-black"
                             />
                         </div>
-                        <div className="space-y-1">
-                            <h3 className="text-sm font-semibold">Start a conversation</h3>
-                            <p className="text-xs text-muted-foreground">
-                                Ask questions about your database schema and get AI-generated SQL
-                                queries
-                            </p>
-                        </div>
-                        <div className="flex flex-wrap justify-center gap-2">
-                            <Badge variant="outline" className="h-5 text-[0.625rem]">
-                                Find tables with...
-                            </Badge>
-                            <Badge variant="outline" className="h-5 text-[0.625rem]">
-                                List all columns...
-                            </Badge>
-                            <Badge variant="outline" className="h-5 text-[0.625rem]">
-                                Join tables...
-                            </Badge>
-                        </div>
-                    </CardContent>
-                </Card>
+                    </div>
+                    <h3 className="mb-2 text-center text-lg font-semibold text-black dark:text-white">
+                        Start a conversation
+                    </h3>
+                    <p className="mb-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                        Ask questions about your database schema and get AI-generated SQL queries
+                    </p>
+                    <div className="flex flex-wrap justify-center gap-2">
+                        <span className="rounded-sm border border-gray-200 px-3 py-1 text-xs font-medium text-gray-600 dark:border-gray-700 dark:text-gray-400">
+                            Find tables with...
+                        </span>
+                        <span className="rounded-sm border border-gray-200 px-3 py-1 text-xs font-medium text-gray-600 dark:border-gray-700 dark:text-gray-400">
+                            List all columns...
+                        </span>
+                        <span className="rounded-sm border border-gray-200 px-3 py-1 text-xs font-medium text-gray-600 dark:border-gray-700 dark:text-gray-400">
+                            Join tables...
+                        </span>
+                    </div>
+                </div>
             </div>
         );
     }

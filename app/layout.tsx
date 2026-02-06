@@ -1,18 +1,18 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono, Outfit } from 'next/font/google';
+import { DM_Sans, Space_Mono } from 'next/font/google';
 import { Toaster } from '@/components/ui/sonner';
 import './globals.css';
 
-const outfit = Outfit({ subsets: ['latin'], variable: '--font-sans' });
-
-const geistSans = Geist({
-    variable: '--font-geist-sans',
+const dmSans = DM_Sans({
     subsets: ['latin'],
+    variable: '--font-sans',
+    weight: ['400', '500', '600'],
 });
 
-const geistMono = Geist_Mono({
-    variable: '--font-geist-mono',
+const spaceMono = Space_Mono({
     subsets: ['latin'],
+    variable: '--font-mono',
+    weight: ['400', '700'],
 });
 
 export const metadata: Metadata = {
@@ -26,8 +26,8 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en" className={outfit.variable}>
-            <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <html lang="en" className={dmSans.variable}>
+            <body className={`${dmSans.variable} ${spaceMono.variable} antialiased`}>
                 {children}
                 <Toaster />
             </body>

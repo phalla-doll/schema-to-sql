@@ -21,7 +21,8 @@
                 "useAriaPropsForRole": "warn",
                 "useAriaPropsSupportedByRole": "warn",
                 "useValidAriaProps": "warn",
-                "useValidAriaValues": "warn"
+                "useValidAriaValues": "warn",
+                "useSemanticElements": "off"
             },
             "correctness": {
                 "noUnusedVariables": "warn",

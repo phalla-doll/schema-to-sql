@@ -3,7 +3,6 @@
 import { type KeyboardEvent, useRef, useState } from 'react';
 import { SchemaStats } from '@/components/schema/schema-stats';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import type { DatabaseSchema } from '@/types';
 
 interface SchemaUploadProps {
@@ -109,124 +108,127 @@ export function SchemaUpload({ onSchemaLoaded }: SchemaUploadProps) {
     };
 
     return (
-        <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-4">
-            <Card className="w-full max-w-2xl">
-                <CardContent className="p-8">
-                    <div className="mb-8 text-center">
-                        <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-8 w-8 text-primary"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                role="img"
-                                aria-label="File document icon"
-                            >
-                                <title>File document</title>
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                />
-                            </svg>
-                        </div>
-                        <h1 className="mb-2 text-3xl font-bold">Upload Database Schema</h1>
-                        <p className="text-muted-foreground">
-                            Upload a SQL Server, MySQL, or dump schema file to get started
-                        </p>
-                    </div>
-
-                    {/* biome-ignore lint/a11y/useSemanticElements: Drag-and-drop drop zone requires custom handling */}
-                    <div
-                        className={`mb-6 cursor-pointer rounded-lg border-2 border-dashed p-12 text-center transition-colors ${
-                            dragActive
-                                ? 'border-primary bg-primary/5'
-                                : 'border-muted-foreground/25 hover:border-primary/50'
-                        }`}
-                        onDragEnter={handleDrag}
-                        onDragLeave={handleDrag}
-                        onDragOver={handleDrag}
-                        onDrop={handleDrop}
-                        onClick={handleBrowseClick}
-                        onKeyDown={handleKeyDown}
-                        role="button"
-                        tabIndex={0}
-                        aria-label="Browse files to upload"
-                    >
+        <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-6">
+            <div className="w-full max-w-2xl rounded-sm border-2 border-gray-200 bg-white p-8 dark:border-gray-700 dark:bg-gray-900">
+                <div className="mb-8 text-center">
+                    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-sm bg-black px-4 dark:bg-white dark:px-4">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            className="mx-auto mb-4 h-12 w-12 text-muted-foreground"
+                            className="h-8 w-8 text-white dark:text-black"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
                             role="img"
-                            aria-label="Upload cloud icon"
+                            aria-label="File document icon"
                         >
-                            <title>Upload cloud</title>
+                            <title>File document</title>
                             <path
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                                 strokeWidth={2}
-                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                             />
                         </svg>
-                        <p className="mb-2 text-lg font-medium">
-                            Drag and drop your schema file here
-                        </p>
-                        <p className="mb-4 text-sm text-muted-foreground">
-                            Supports .sql, .txt, and .dump files
-                        </p>
-                        <Button onClick={handleBrowseClick} disabled={isLoading}>
-                            {isLoading ? 'Processing...' : 'Browse Files'}
-                        </Button>
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept=".sql,.txt,.dump"
-                            className="hidden"
-                            onChange={handleFileInputChange}
-                            disabled={isLoading}
-                            aria-label="Upload schema file"
+                    </div>
+                    <h1 className="mb-2 text-2xl font-semibold text-black dark:text-white">
+                        Upload Database Schema
+                    </h1>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Upload a SQL Server, MySQL, or dump schema file to get started
+                    </p>
+                </div>
+
+                <div
+                    className={`mb-6 cursor-pointer rounded-sm border-2 border-dashed p-12 text-center transition-all ${
+                        dragActive
+                            ? 'border-black bg-blue-50 dark:border-white dark:bg-blue-500/10'
+                            : 'border-gray-300 hover:border-black dark:border-gray-600 dark:hover:border-white'
+                    }`}
+                    onDragEnter={handleDrag}
+                    onDragLeave={handleDrag}
+                    onDragOver={handleDrag}
+                    onDrop={handleDrop}
+                    onKeyDown={handleKeyDown}
+                    onClick={handleBrowseClick}
+                    aria-label="Browse files to upload"
+                    role="button"
+                    tabIndex={0}
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="mx-auto mb-4 h-12 w-12 text-gray-400 dark:text-gray-600"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        role="img"
+                        aria-label="Upload cloud icon"
+                    >
+                        <title>Upload cloud</title>
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
                         />
-                    </div>
-
-                    {error && (
-                        <div className="mb-6 rounded-lg bg-destructive/10 p-4 text-destructive">
-                            {error}
-                        </div>
-                    )}
-
-                    <div className="mb-4">
-                        <p className="mb-2 text-sm font-medium">Or try an example:</p>
-                        <div className="space-y-2">
-                            {DATASET_FILES.map((file) => (
-                                <Button
-                                    key={file.name}
-                                    variant="outline"
-                                    size="sm"
-                                    type="button"
-                                    onClick={() => handleImportFromDataset(file.name)}
-                                    disabled={isLoading}
-                                    className="w-full justify-start"
-                                >
-                                    {file.label}
-                                </Button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <SchemaStats
-                        tableCount={0}
-                        columnCount={0}
-                        viewCount={0}
-                        procedureCount={0}
-                        format={null}
-                        uploadedAt={null}
+                    </svg>
+                    <p className="mb-2 text-base font-medium text-black dark:text-white">
+                        Drag and drop your schema file here
+                    </p>
+                    <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+                        Supports .sql, .txt, and .dump files
+                    </p>
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".sql,.txt,.dump"
+                        className="hidden"
+                        onChange={handleFileInputChange}
+                        disabled={isLoading}
+                        aria-label="Upload schema file"
                     />
-                </CardContent>
-            </Card>
+                </div>
+                <div className="flex justify-center">
+                    <Button disabled={isLoading}>
+                        {isLoading ? 'Processing...' : 'Browse Files'}
+                    </Button>
+                </div>
+
+                {error && (
+                    <div className="mb-6 rounded-sm border-2 border-red-200 bg-red-50 p-4 text-red-600 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400">
+                        {error}
+                    </div>
+                )}
+
+                <div className="mb-4">
+                    <p className="mb-2 text-sm font-semibold text-black dark:text-white">
+                        Or try an example:
+                    </p>
+                    <div className="space-y-2">
+                        {DATASET_FILES.map((file) => (
+                            <Button
+                                key={file.name}
+                                variant="outline"
+                                size="sm"
+                                type="button"
+                                onClick={() => handleImportFromDataset(file.name)}
+                                disabled={isLoading}
+                                className="w-full justify-start"
+                            >
+                                {file.label}
+                            </Button>
+                        ))}
+                    </div>
+                </div>
+
+                <SchemaStats
+                    tableCount={0}
+                    columnCount={0}
+                    viewCount={0}
+                    procedureCount={0}
+                    format={null}
+                    uploadedAt={null}
+                />
+            </div>
         </div>
     );
 }
