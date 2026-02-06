@@ -9,7 +9,6 @@ import { cn } from '@/lib/utils';
 
 function InputGroup({ className, ...props }: React.ComponentProps<'div'>) {
     return (
-        // biome-ignore lint/a11y/useSemanticElements: UI component using div for styling
         <div
             data-slot="input-group"
             role="group"
@@ -49,7 +48,6 @@ function InputGroupAddon({
     ...props
 }: React.ComponentProps<'div'> & VariantProps<typeof inputGroupAddonVariants>) {
     return (
-        // biome-ignore lint/a11y/useSemanticElements: UI component using div for styling
         // biome-ignore lint/a11y/useKeyWithClickEvents: Click handler is intentional for focus management
         <div
             role="group"

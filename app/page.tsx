@@ -6,6 +6,7 @@ import { ChatInput } from '@/components/chat/chat-input';
 import { SchemaSearch } from '@/components/schema/schema-search';
 import { SchemaStats } from '@/components/schema/schema-stats';
 import { SchemaTree } from '@/components/schema/schema-tree';
+import { SchemaReimportModal } from '@/components/upload/schema-reimport-modal';
 import { SchemaUpload } from '@/components/upload/schema-upload';
 import { expansionStore } from '@/lib/schema/expansion-store';
 import { useChatHistory, usePreferences, useSchema } from '@/lib/schema/hooks';
@@ -19,6 +20,7 @@ export default function Page() {
         usePreferences();
     const [searchQuery, setSearchQuery] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
     const tableCount = useMemo(() => {
         if (!schema) return 0;
@@ -76,7 +78,7 @@ export default function Page() {
 
     const handleSendMessage = useCallback(
         async (message: string) => {
-            if (!schema) return;
+            if (!schema || schema.tables.length === 0) return;
 
             const userMessage: Message = {
                 id: crypto.randomUUID(),
@@ -147,13 +149,13 @@ export default function Page() {
         [refresh, clearHistory]
     );
 
-    if (!schema) {
+    if (!schema || schema.tables.length === 0) {
         return <SchemaUpload onSchemaLoaded={handleSchemaLoaded} />;
     }
 
     return (
         <div className="flex h-screen flex-col border-r border-gray-200 dark:border-gray-700">
-            <header className="flex items-center justify-between border-b-2 border-black px-6 py-4">
+            <header className="flex items-center justify-between border-b-2 border-black px-6 py-2">
                 <div className="flex items-center gap-3">
                     <h1 className="text-lg font-semibold tracking-tight">Schema-to-SQL</h1>
                 </div>
@@ -166,6 +168,13 @@ export default function Page() {
                         format={schema.format}
                         uploadedAt={schema.uploadedAt}
                     />
+                    <button
+                        type="button"
+                        onClick={() => setIsImportModalOpen(true)}
+                        className="rounded-sm border-2 border-gray-200 px-4 py-2 text-sm font-medium hover:bg-gray-100 hover:border-black dark:border-gray-700 dark:hover:bg-white/5 dark:hover:border-white"
+                    >
+                        Reimport
+                    </button>
                     <button
                         type="button"
                         onClick={handleClearHistory}
@@ -208,6 +217,7 @@ export default function Page() {
                     </div>
                 </main>
             </div>
+            <SchemaReimportModal open={isImportModalOpen} onOpenChange={setIsImportModalOpen} />
         </div>
     );
 }

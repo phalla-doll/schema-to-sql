@@ -1,4 +1,5 @@
 import type { DatabaseSchema, Message } from '@/types';
+import { validateSchema } from './validator';
 
 const SCHEMA_KEY = 'schema-to-sql:uploaded-schema';
 const CHAT_KEY = 'schema-to-sql:chat-history';
@@ -22,6 +23,12 @@ export const schemaStore = {
 
     setSchema(schema: DatabaseSchema): void {
         if (typeof window === 'undefined') return;
+
+        const validation = validateSchema(schema);
+        if (!validation.isValid) {
+            return;
+        }
+
         const serialized = JSON.stringify(schema);
         if (serialized.length > MAX_SCHEMA_SIZE) {
             inMemorySchema = schema;

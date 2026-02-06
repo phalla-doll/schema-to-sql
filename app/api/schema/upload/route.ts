@@ -33,6 +33,15 @@ export async function POST(request: NextRequest) {
         const parser = createParser(sqlContent);
         const result = parser.parse(sqlContent);
 
+        if (!result.tables || result.tables.length === 0) {
+            return NextResponse.json(
+                {
+                    error: 'No tables found in the schema file. Please ensure your SQL file contains CREATE TABLE statements.',
+                },
+                { status: 400 }
+            );
+        }
+
         let format: 'sqlserver' | 'mysql' | 'dump';
         if (parser instanceof DumpParser) {
             const dbms = (parser as unknown as { getDBMS: () => string }).getDBMS();

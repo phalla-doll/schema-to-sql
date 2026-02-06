@@ -4,6 +4,7 @@ import { getDefaultModel } from '@/lib/ai/model-selector';
 import { generateSQL } from '@/lib/ai/sqlGenerator';
 import { validateSQL } from '@/lib/ai/sqlValidator';
 import { matchSchema } from '@/lib/schema/matcher';
+import { validateSchema } from '@/lib/schema/validator';
 
 export async function POST(request: NextRequest) {
     try {
@@ -12,6 +13,11 @@ export async function POST(request: NextRequest) {
 
         if (!query || !schema) {
             return NextResponse.json({ error: 'Query and schema are required' }, { status: 400 });
+        }
+
+        const schemaValidation = validateSchema(schema);
+        if (!schemaValidation.isValid) {
+            return NextResponse.json({ error: schemaValidation.error }, { status: 400 });
         }
 
         if (!apiKey) {
